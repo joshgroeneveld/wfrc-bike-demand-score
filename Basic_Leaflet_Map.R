@@ -15,6 +15,9 @@ summary(transit_ridership)
 bike_demand_bins <- c(0, 10, 20, 30, 40, 50, 60, 70)
 bike_demand_pal <- colorBin("YlGnBu", domain = bike_ped_demand$BikeDemandScore, bins = bike_demand_bins)
 
+transit_boardings_bins <- c(0, 1, 2, 5, 10, 50, 100, 1200)
+transit_boardings_pal <- colorBin("YlOrRd", domain = transit_ridership$AVGBoard, bins = transit_boardings_bins)
+
 # set pop-up content
 bike_ped_demand$popup <- paste("<strong>", "Zone ID: ", bike_ped_demand$zone_id, "</strong>",
                                "</br>", "Bike Demand Score: ", bike_ped_demand$BikeDemandScore)
@@ -40,19 +43,26 @@ m <- leaflet() %>%
   addCircleMarkers(data = transit_ridership, 
                    ~Longitude,
                    ~Latitude, 
-                   radius = 2, 
+                   radius = 5, 
                    stroke = TRUE, 
-                   color = "#424242", 
+                   color = "#FFFFFF", 
                    weight = 1, 
-                   fillOpacity = 1, 
-                   fillColor ="#FDFDFD",
+                   fillOpacity = 1,
+                   fillColor = ~transit_boardings_pal(AVGBoard),
                    group = "Transit Ridership",
                    popup = ~popup)%>%
   addLegend("bottomright",
             opacity = 1,
-            colors = c("#ffffcc", "#c7e9b4", "#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84"),
+            pal = bike_demand_pal,
             title = "Bike Demand Score",
-            labels = c("< 10.00", "10.01 - 20.00", "20.01 - 30.00", "30.01 - 40.00", "40.01 - 50.00", "50.01 - 60.00", "60.01 - 70.00"))%>%
+            values = bike_demand_bins,
+            group = "Bike Demand Score")%>%
+  addLegend("bottomright",
+            opacity = 1,
+            pal = transit_boardings_pal,
+            title = "Daily AVG Transit Boardings",
+            values = transit_boardings_bins,
+            group = "Transit Ridership") %>%
   addLayersControl(overlayGroups = c("Transit Ridership", "Bike Demand Score"),
                    options = layersControlOptions(collapsed = FALSE))
   
